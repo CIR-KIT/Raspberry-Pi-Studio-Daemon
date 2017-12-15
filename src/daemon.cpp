@@ -1,10 +1,10 @@
 namespace
 {
 
-constexpr auto read_pin {0};
-constexpr auto token {
+constexpr auto read_pin = 0;
+constexpr auto token =
 #include "token"
-};
+;
 
 }
 
@@ -31,7 +31,6 @@ void notify(const StudioState& state);
 }
 
 extern "C"
-[[noreturn]]
 void run_daemon(const char* executable_name)
 {
   openlog(executable_name, LOG_PID, LOG_DAEMON);
@@ -41,8 +40,8 @@ void run_daemon(const char* executable_name)
   }
   pinMode(read_pin, INPUT);
 
-  auto last_value {digitalRead(read_pin)};
-  for (auto value {digitalRead(read_pin)}; true; last_value = value, value = digitalRead(read_pin)) {
+  auto last_value = digitalRead(read_pin);
+  for (auto value = digitalRead(read_pin); true; last_value = value, value = digitalRead(read_pin)) {
     if (last_value == value)
       continue;
 

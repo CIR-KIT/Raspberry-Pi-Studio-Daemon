@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1.3)
+cmake_minimum_required(VERSION 2.8)
 project(StudioDaemon
   VERSION   0.1.0
   LANGUAGES CXX
@@ -12,9 +12,6 @@ find_package(Threads REQUIRED)
 
 add_executable(studio_daemon src/main.cpp src/daemon.cpp)
 target_link_libraries(studio_daemon Threads::Threads wiringPi)
-target_compile_options(studio_daemon PRIVATE
-  $<$<CXX_COMPILER_ID:Clang>:-Weverything -Wno-c++98-compat>
-  $<$<CXX_COMPILER_ID:GNU>:-Wall -Wextra>)
 
 install(TARGETS studio_daemon
         RUNTIME DESTINATION bin

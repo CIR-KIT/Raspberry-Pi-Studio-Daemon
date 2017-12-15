@@ -5,7 +5,7 @@ extern "C" {
 #include "run_daemon.h"
 }
 
-int main([[maybe_unused]] int argc, char** argv)
+int main(int argc, char** argv)
 {
   if (daemon(0, 0))
     return EXIT_FAILURE;
