@@ -1,7 +1,12 @@
+#include <chrono>
+
 namespace
 {
 
 constexpr auto read_pin = 0;
+constexpr auto continually_time = std::chrono::minutes(30);
+constexpr auto check_time = std::chrono::minutes(1);
+
 constexpr auto token =
 #include "token"
 ;
@@ -10,6 +15,7 @@ constexpr auto token =
 
 #include <cstdlib>
 #include <sstream>
+#include <thread>
 
 extern "C" {
 #include <syslog.h>
@@ -40,18 +46,28 @@ void run_daemon(const char* executable_name)
   }
   pinMode(read_pin, INPUT);
 
+  const auto continually_count = continually_time / check_time;
   auto last_value = digitalRead(read_pin);
+  auto same_value_count = 0u;
   for (auto value = digitalRead(read_pin); true; last_value = value, value = digitalRead(read_pin)) {
-    if (last_value == value)
-      continue;
+    std::this_thread::sleep_for(check_time);
 
-    if (value != LOW) {
-      syslog(LOG_INFO, "Studio is open");
-      notify(StudioState::open);
-    } else {
-      syslog(LOG_INFO, "Studio is closed");
-      notify(StudioState::close);
+    if (last_value == value) {
+      if (same_value_count < continually_count) {
+        ++same_value_count;
+        continue;
+      }
+
+      if (value == LOW) {
+        syslog(LOG_INFO, "Studio is open");
+        notify(StudioState::open);
+      } else {
+        syslog(LOG_INFO, "Studio is closed");
+        notify(StudioState::close);
+      }
     }
+
+    same_value_count = 0;
   }
 }
 
