@@ -7,9 +7,9 @@ constexpr auto read_pin = 0;
 constexpr auto continually_time = std::chrono::minutes(30);
 constexpr auto check_time = std::chrono::minutes(1);
 
-constexpr auto token =
+constexpr const char* token[] = {
 #include "token"
-;
+};
 
 }
 
@@ -77,16 +77,18 @@ namespace
 void notify(const StudioState& state)
 {
   std::ostringstream oss;
-  oss << "curl -X POST -H 'Authorization: Bearer " << token << "' -F 'message=";
-  switch (state) {
-  case StudioState::open:
-    oss << "Studio is open.";
-    break;
-  case StudioState::close:
-    oss << "Studio is closed.";
+  for (auto it = std::begin(token), e = std::end(token); it != e; ++it) {
+    oss << "curl -X POST -H 'Authorization: Bearer " << *it << "' -F 'message=";
+    switch (state) {
+    case StudioState::open:
+      oss << "Studio is open.";
+      break;
+    case StudioState::close:
+      oss << "Studio is closed.";
+    }
+    oss << "' https://notify-api.line.me/api/notify";
+    static_cast<void>(std::system(oss.str().c_str()));
   }
-  oss << "' https://notify-api.line.me/api/notify";
-  static_cast<void>(std::system(oss.str().c_str()));
 }
 
 }
