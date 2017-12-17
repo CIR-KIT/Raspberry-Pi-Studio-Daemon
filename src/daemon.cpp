@@ -4,8 +4,8 @@ namespace
 {
 
 constexpr auto read_pin = 0;
-constexpr auto continually_time = std::chrono::minutes(30);
-constexpr auto check_time = std::chrono::minutes(1);
+constexpr auto continually_time = std::chrono::minutes(5);
+constexpr auto check_time = std::chrono::seconds(30);
 
 constexpr const char* token[] = {
 #include "token"
@@ -56,15 +56,16 @@ void run_daemon(const char* executable_name)
       if (same_value_count < continually_count) {
         ++same_value_count;
         continue;
-      }
-
-      if (value == LOW) {
-        syslog(LOG_INFO, "Studio is open");
-        notify(StudioState::open);
-      } else {
-        syslog(LOG_INFO, "Studio is closed");
-        notify(StudioState::close);
-      }
+      } else if (same_value_count == continually_count) {
+        ++same_value_count; // onetime run this block
+        if (value == LOW) {
+          syslog(LOG_INFO, "Studio is open");
+          notify(StudioState::open);
+        } else {
+          syslog(LOG_INFO, "Studio is closed");
+          notify(StudioState::close);
+        }
+      } // ignore same value_count > continually_count
     }
 
     same_value_count = 0;
