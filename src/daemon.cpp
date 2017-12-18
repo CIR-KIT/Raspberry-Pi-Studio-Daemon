@@ -4,8 +4,8 @@ namespace
 {
 
 constexpr auto read_pin = 0;
-constexpr auto continually_time = std::chrono::minutes(5);
-constexpr auto check_time = std::chrono::seconds(30);
+constexpr auto continually_time = std::chrono::seconds(10);
+constexpr auto check_time = std::chrono::seconds(1);
 
 constexpr const char* token[] = {
 #include "token"
