@@ -66,9 +66,8 @@ void run_daemon(const char* executable_name)
           notify(StudioState::close);
         }
       } // ignore same value_count > continually_count
-    }
-
-    same_value_count = 0;
+    } else
+      same_value_count = 0;
   }
 }
 
