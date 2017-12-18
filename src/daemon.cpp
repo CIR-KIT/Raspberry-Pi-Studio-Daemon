@@ -78,8 +78,8 @@ namespace
 
 void notify(const StudioState& state)
 {
-  std::ostringstream oss;
   for (auto it = std::begin(token), e = std::end(token); it != e; ++it) {
+    std::ostringstream oss;
     oss << "curl -X POST -H 'Authorization: Bearer " << *it << "' -F 'message=";
     switch (state) {
     case StudioState::open:
