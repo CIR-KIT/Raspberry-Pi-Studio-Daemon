@@ -89,7 +89,7 @@ void notify(const StudioState& state)
       oss << "Studio is closed.";
     }
     oss << "' https://notify-api.line.me/api/notify";
-    static_cast<void>(std::system(oss.str().c_str()));
+    syslog(LOG_INFO, "%d: %s", std::system(oss.str().c_str()), *it);
   }
 }
 
