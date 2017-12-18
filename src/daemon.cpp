@@ -48,26 +48,28 @@ void run_daemon(const char* executable_name)
 
   const auto continually_count = continually_time / check_time;
   auto last_value = digitalRead(read_pin);
-  auto same_value_count = 0u;
+  auto same_value_count = continually_count + 1;
   for (auto value = digitalRead(read_pin); true; last_value = value, value = digitalRead(read_pin)) {
     std::this_thread::sleep_for(check_time);
 
-    if (last_value == value) {
-      if (same_value_count < continually_count) {
-        ++same_value_count;
-        continue;
-      } else if (same_value_count == continually_count) {
-        ++same_value_count; // onetime run this block
-        if (value == LOW) {
-          syslog(LOG_INFO, "Studio is open");
-          notify(StudioState::open);
-        } else {
-          syslog(LOG_INFO, "Studio is closed");
-          notify(StudioState::close);
-        }
-      } // ignore same value_count > continually_count
-    } else
+    if (last_value != value) {
       same_value_count = 0;
+      continue;
+    }
+
+    if (same_value_count < continually_count) {
+      ++same_value_count;
+      continue;
+    } else if (same_value_count == continually_count) {
+      ++same_value_count; // onetime run this block
+      if (value == LOW) {
+        syslog(LOG_INFO, "Studio is open");
+        notify(StudioState::open);
+      } else {
+        syslog(LOG_INFO, "Studio is closed");
+        notify(StudioState::close);
+      }
+    } // ignore same value_count > continually_count
   }
 }
 
