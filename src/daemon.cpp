@@ -51,6 +51,7 @@ void run_daemon(const char* executable_name)
   auto same_value_count = continually_count + 1;
   auto prev_state {StudioState::close};
   if (last_value == LOW)prev_state = StudioState::open;
+  notify(prev_state);//onetime run every reboot
   for (auto value = digitalRead(read_pin); true; last_value = value, value = digitalRead(read_pin)) {
     std::this_thread::sleep_for(check_time);
 
