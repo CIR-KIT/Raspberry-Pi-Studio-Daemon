@@ -3,13 +3,13 @@
 namespace
 {
 
-constexpr auto read_pin = 0;
-constexpr auto continually_time = std::chrono::seconds(60);
-constexpr auto check_time = std::chrono::seconds(5);
+  constexpr auto read_pin = 0;
+  constexpr auto continually_time = std::chrono::seconds(50);
+  constexpr auto check_time = std::chrono::seconds(5);
 
-constexpr const char* token[] = {
+  constexpr const char* token[] = {
 #include "token"
-};
+  };
 
 }
 
@@ -49,7 +49,7 @@ void run_daemon(const char* executable_name)
   const auto continually_count = continually_time / check_time;
   auto last_value = digitalRead(read_pin);
   auto same_value_count = continually_count + 1;
-  auto prev_state {StudioState::close};
+  auto prev_state = StudioState::close;
   if (last_value == LOW)prev_state = StudioState::open;
   notify(prev_state);//onetime run every reboot
   for (auto value = digitalRead(read_pin); true; last_value = value, value = digitalRead(read_pin)) {
@@ -69,7 +69,7 @@ void run_daemon(const char* executable_name)
         syslog(LOG_INFO, "Studio is open");
         notify(StudioState::open);
         prev_state = StudioState::open;
-      } else if (prev_state == StudioState::open){
+      } else if (prev_state == StudioState::open) {
         syslog(LOG_INFO, "Studio is closed");
         notify(StudioState::close);
         prev_state = StudioState::close;
@@ -81,21 +81,21 @@ void run_daemon(const char* executable_name)
 namespace
 {
 
-void notify(const StudioState& state)
-{
-  for (auto it = std::begin(token), e = std::end(token); it != e; ++it) {
-    std::ostringstream oss;
-    oss << "curl -X POST -H 'Authorization: Bearer " << *it << "' -F 'message=";
-    switch (state) {
-    case StudioState::open:
-      oss << "Studio is open.";
-      break;
-    case StudioState::close:
-      oss << "Studio is closed.";
+  void notify(const StudioState& state)
+  {
+    for (auto it = std::begin(token), e = std::end(token); it != e; ++it) {
+      std::ostringstream oss;
+      oss << "curl -X POST -H 'Authorization: Bearer " << *it << "' -F 'message=";
+      switch (state) {
+        case StudioState::open:
+          oss << "Studio is open.";
+          break;
+        case StudioState::close:
+          oss << "Studio is closed.";
+      }
+      oss << "' https://notify-api.line.me/api/notify";
+      syslog(LOG_INFO, "%d: %s", std::system(oss.str().c_str()), *it);
     }
-    oss << "' https://notify-api.line.me/api/notify";
-    syslog(LOG_INFO, "%d: %s", std::system(oss.str().c_str()), *it);
   }
-}
 
 }
